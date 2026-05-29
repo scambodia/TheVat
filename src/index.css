@@ -356,6 +356,18 @@ body {
   animation: sprite-float 6s ease-in-out infinite;
 }
 
+/* Programmatic Hybrid Gene Splice Styles */
+.vat-sprite.splice-a {
+  animation: splice-phase-a 0.4s linear infinite, sprite-float 6s ease-in-out infinite;
+}
+
+.vat-sprite.splice-b {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  animation: splice-phase-b 0.4s linear infinite, sprite-float 6s ease-in-out infinite;
+}
+
 .vat-glass-highlight {
   position: absolute;
   top: 0; bottom: 0;
@@ -523,10 +535,35 @@ body {
   letter-spacing: 0.5px;
 }
 
-.terminal-indicator-box {
+/* Dynamic Tab Headers */
+.terminal-tabs-rack {
   display: flex;
-  align-items: center;
   gap: 6px;
+}
+
+.terminal-tab {
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.terminal-tab.active {
+  border-color: var(--neon-cyan);
+  background: rgba(0, 243, 255, 0.08);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 243, 255, 0.15);
+}
+
+.terminal-tab:hover:not(.active) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .terminal-screen {
@@ -576,6 +613,85 @@ body {
   font-size: 11px;
   font-weight: 600;
   color: var(--neon-cyan);
+}
+
+/* Splicer Panel Form Styles */
+.splicer-form {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.splicer-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.splicer-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  letter-spacing: 1px;
+}
+
+.splicer-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.3s;
+}
+
+.splicer-select:focus {
+  border-color: var(--neon-cyan);
+}
+
+.splicer-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 4px 0;
+}
+
+.splicer-divider::before, .splicer-divider::after {
+  content: '';
+  flex-grow: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.splicer-divider::before { margin-right: 15px; }
+.splicer-divider::after { margin-left: 15px; }
+
+.splicer-execute-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 /* Diagnostic Readout Cards */
@@ -1031,3 +1147,155 @@ body {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
+
+/* Splicing Phase Hologram Shifting animations */
+@keyframes splice-phase-a {
+  0%, 100% { opacity: 0.82; filter: hue-rotate(60deg) saturate(1.4); }
+  50% { opacity: 0.12; filter: hue-rotate(-60deg) brightness(0.8); }
+}
+
+@keyframes splice-phase-b {
+  0%, 100% { opacity: 0.12; filter: hue-rotate(-60deg) brightness(0.8); }
+  50% { opacity: 0.82; filter: hue-rotate(60deg) saturate(1.4); }
+}
+
+/* Gene Splicing Matrix Controller Panel */
+.vat-blend-selector-rack {
+  width: 100%;
+  margin-top: 15px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 243, 255, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.blend-rack-header {
+  display: flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 6px;
+}
+
+.blend-indicator-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--neon-cyan);
+  box-shadow: 0 0 6px var(--neon-cyan);
+  margin-left: auto;
+  animation: pulse-badge 1.5s infinite;
+}
+
+.blend-rack-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.blend-rack-btn {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  text-align: center;
+}
+
+.blend-rack-btn:hover {
+  border-color: rgba(0, 243, 255, 0.3);
+  color: var(--text-primary);
+  background: rgba(0, 243, 255, 0.02);
+}
+
+.blend-rack-btn.active {
+  background: rgba(0, 243, 255, 0.08);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+}
+
+/* Blending Overlay & Loader inside glass cylinder */
+.vat-blending-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 7, 16, 0.6);
+  backdrop-filter: blur(1.5px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 25;
+  color: var(--neon-cyan);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.vat-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(0, 243, 255, 0.15);
+  border-top-color: var(--neon-cyan);
+  border-radius: 50%;
+  animation: spin-custom 1s linear infinite;
+}
+
+.blended-hybrid {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  animation: sprite-float 6s ease-in-out infinite;
+}
+
+/* Pre-calculated Neural Asset styles */
+.vat-blend-selector-rack.precalc-active {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+}
+
+.blend-indicator-dot.precalc {
+  background-color: var(--neon-green);
+  box-shadow: 0 0 6px var(--neon-green);
+}
+
+.precalc-banner {
+  padding: 10px 8px;
+  text-align: center;
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px dashed rgba(16, 185, 129, 0.25);
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+.precalc-title-glow {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--neon-green);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.precalc-banner p {
+  font-size: 8px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+

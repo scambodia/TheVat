@@ -42,13 +42,21 @@ export default function App() {
   const [activePoseIndex, setActivePoseIndex] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(false);
 
+  // Genetic splice states
+  const [splicedHybrid, setSplicedHybrid] = useState(null);
+  const [isHybridActive, setIsHybridActive] = useState(false);
+
   // Derivations
   const currentGroup = characterGroups[activeGroupIndex];
-  const activeSprite = currentGroup.sprites[activePoseIndex] || currentGroup.sprites[0];
-  const hasMultiplePoses = currentGroup.sprites.length > 1;
+  
+  const activeSprite = isHybridActive && splicedHybrid 
+    ? splicedHybrid 
+    : (currentGroup.sprites[activePoseIndex] || currentGroup.sprites[0]);
+    
+  const hasMultiplePoses = isHybridActive ? false : (currentGroup.sprites.length > 1);
 
   // Find where our current active sprite is situated in the global conveyor list
-  const activeConveyorIndex = spriteData.findIndex(s => s.id === activeSprite.id);
+  const activeConveyorIndex = isHybridActive ? -1 : spriteData.findIndex(s => s.id === activeSprite.id);
 
   // Browser Audio Context references for synthesizing lab noises
   const audioCtxRef = useRef(null);
@@ -159,6 +167,7 @@ export default function App() {
 
   // Cycle to the next Character Template/Outfit group
   const handleCycleGroup = () => {
+    setIsHybridActive(false); // Reset spliced hybrid status on cycle
     setActiveGroupIndex((prev) => (prev + 1) % characterGroups.length);
     setActivePoseIndex(0); // Reset pose to first one in the new group
     playSynthBeep(850);
@@ -174,6 +183,7 @@ export default function App() {
 
   // Manual pod injection from bottom carousel
   const handleInjectPod = (globalIndex) => {
+    setIsHybridActive(false); // Reset spliced hybrid status on manual inject
     const clickedSprite = spriteData[globalIndex];
     
     // Find which group and pose index this clicked sprite maps to
@@ -184,6 +194,44 @@ export default function App() {
       setActivePoseIndex(poseIdx);
     }
     playSynthBeep(1050);
+  };
+
+  // Genetic splice callback
+  const handleSplice = (subjectA, subjectB) => {
+    const hybrid = {
+      id: "spliced_hybrid",
+      name: `${subjectA.name.split(':')[1] || subjectA.name} x ${subjectB.name.split(':')[1] || subjectB.name} Hybrid`,
+      filename: subjectA.filename,
+      filenameB: subjectB.filename,
+      parentAId: subjectA.id,
+      parentBId: subjectB.id,
+      category: "Genetic Hybrid",
+      subjectId: "HYB-99",
+      pose: `Synthesized genetic posture blending Subject A (${subjectA.name}) pose and Subject B (${subjectB.name}) pose.`,
+      clothing: `Mutated outer containment layer combining Subject A's outfit and Subject B's clothes.`,
+      reference: `Genetic splice matrix: ${subjectA.reference} & ${subjectB.reference}.`,
+      stability: `${((parseFloat(subjectA.stability) + parseFloat(subjectB.stability)) / 2 - 25).toFixed(1)}% (MUTATED)`,
+      powerLevel: Math.round((parseFloat(subjectA.powerLevel) || 100) + (parseFloat(subjectB.powerLevel) || 100) * 1.45).toString(),
+      dnaSequence: `${subjectA.dnaSequence.substring(0, 11)}${subjectB.dnaSequence.substring(11)}`,
+      hazardLevel: "Extremely Unstable Mutation (Critical)"
+    };
+    
+    setSplicedHybrid(hybrid);
+    setIsHybridActive(true);
+    
+    // Play dramatic synthesized glitch beep sequence
+    if (soundEnabled) {
+      let delay = 0;
+      for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+          playSynthBeep(Math.random() * 1200 + 400, 0.05);
+        }, delay);
+        delay += 80;
+      }
+      setTimeout(() => {
+        playRecalibrationSweep(900, 150);
+      }, 640);
+    }
   };
 
   // Trigger special sound when focused sprite updates
@@ -265,7 +313,7 @@ export default function App() {
 
         {/* Right Column: Cyber Diagnostic Terminal */}
         <section className="column-right">
-          <DiagnosticTerminal activeSprite={activeSprite} />
+          <DiagnosticTerminal activeSprite={activeSprite} onSplice={handleSplice} />
         </section>
 
       </main>

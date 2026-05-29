@@ -59,6 +59,28 @@ The containment bay is pre-loaded with the following genetic templates:
 
 ---
 
+## 🧬 Programmatic Canvas-Based Splicing Engine
+
+The containment facility features a custom pixel-level programmatic blending engine built with the **HTML5 Canvas API** that combines two separate character sprites into a unified "gene-spliced hybrid" in real-time in the browser. 
+
+The console features a highly interactive **Splicing Matrix Controller** under the grand chamber to switch between **three custom mathematical blend modes** instantly:
+
+### 1. Ghostly Overlay (Double Exposure)
+*   **Visual Style:** A smooth, ethereal 50/50 overlay blending both specimens' postures together, like a glowing dual-hologram.
+*   **Math:** In overlapping pixel regions, RGB channels are averaged: `(ColorA * 0.5) + (ColorB * 0.5)`. 
+*   **Polish:** Enhances the fusion boundaries with a subtle cybernetic **cyan glowing tint** to highlight the genetic intersections.
+
+### 2. Scanline Spliced (Interlaced Digital Ribbons)
+*   **Visual Style:** A retro, digitized sci-fi look where horizontal scanlines alternate between both parents.
+*   **Math:** In overlapping zones, alternating horizontal strips of `6px` are rendered from either Subject A or Subject B.
+*   **Outline Stabilization:** Limbs or elements unique to one sprite remain solid to keep character silhouettes 100% clean and intact.
+
+### 3. Dominant Trait (Patchwork Puzzle Mosaic)
+*   **Visual Style:** A stitched-together, patchy mosaic where chunks of one specimen's body merge cleanly into another's.
+*   **Math:** Divides overlapping areas into a `20px` grid. Each square block is deterministically assigned to either Subject A or Subject B using a coordinate-based math hash, ensuring the hybrid is stable and perfectly repeatable.
+
+---
+
 ## 🛠️ System Command Guidelines
 
 To run or deploy this console, navigate to the project directory `/Users/puredent/Desktop/paniti` and use the following system operations:
