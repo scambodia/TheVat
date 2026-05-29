@@ -3,29 +3,51 @@ import { spriteData } from './spriteData';
 import CloneVat from './components/CloneVat';
 import DiagnosticTerminal from './components/DiagnosticTerminal';
 import ConveyorBelt from './components/ConveyorBelt';
-import { Volume2, VolumeX, FlaskConical, Shuffle } from 'lucide-react';
+import { Volume2, VolumeX, FlaskConical } from 'lucide-react';
 
-// Distribute sprites into distinct clone category lines
-const vat1Pool = spriteData.filter(s => s.category === "Base Clone");
-const vat2Pool = spriteData.filter(s => s.id.startsWith("science") || s.id === "sciene_guy");
-const vat3Pool = spriteData.filter(s => s.category === "Pop Culture Variant");
-const vat4Pool = spriteData.filter(s => s.category === "Custom Variant" || s.id === "american_boy");
+// Group sprites by outfit/character template lines
+const characterGroups = [
+  {
+    id: "base",
+    name: "Base Replicant",
+    sprites: spriteData.filter(s => s.category === "Base Clone")
+  },
+  {
+    id: "science",
+    name: "Science Guy",
+    sprites: spriteData.filter(s => s.id.startsWith("science") || s.id === "sciene_guy")
+  },
+  {
+    id: "american",
+    name: "American Boy",
+    sprites: spriteData.filter(s => s.id === "american_boy")
+  },
+  {
+    id: "family",
+    name: "Family Man",
+    sprites: spriteData.filter(s => s.id === "family_man")
+  },
+  {
+    id: "love_dad",
+    name: "Love Dad",
+    sprites: spriteData.filter(s => s.id === "love_dad")
+  }
+];
 
 export default function App() {
-  // Array holding the active sprite for each of the 4 chambers
-  const [vatSprites, setVatSprites] = useState([
-    vat1Pool[0], // Base Replicant
-    vat2Pool[0], // Genius Scientist
-    vat3Pool[0], // Pop Culture
-    vat4Pool[0]  // Custom Dad Special
-  ]);
-
-  // Index of the Vat linked to the diagnostic terminal (0 to 3)
-  const [targetedVatIndex, setTargetedVatIndex] = useState(0);
+  // Track active character group template index (0 to 4)
+  const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  
+  // Track active pose index within that specific group
+  const [activePoseIndex, setActivePoseIndex] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(false);
-  const activeSprite = vatSprites[targetedVatIndex];
 
-  // Map the active focused sprite's ID back to find its index in the global conveyor list
+  // Derivations
+  const currentGroup = characterGroups[activeGroupIndex];
+  const activeSprite = currentGroup.sprites[activePoseIndex] || currentGroup.sprites[0];
+  const hasMultiplePoses = currentGroup.sprites.length > 1;
+
+  // Find where our current active sprite is situated in the global conveyor list
   const activeConveyorIndex = spriteData.findIndex(s => s.id === activeSprite.id);
 
   // Browser Audio Context references for synthesizing lab noises
@@ -103,16 +125,16 @@ export default function App() {
 
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.5);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.4);
 
       gain.gain.setValueAtTime(0.02, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start();
-      osc.stop(ctx.currentTime + 0.5);
+      osc.stop(ctx.currentTime + 0.4);
     } catch (e) {}
   };
 
@@ -135,42 +157,41 @@ export default function App() {
     }
   };
 
-  // Global override shuffler
-  const handleShuffleAllPoses = () => {
-    const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    setVatSprites([
-      pickRandom(vat1Pool),
-      pickRandom(vat2Pool),
-      pickRandom(vat3Pool),
-      pickRandom(vat4Pool)
-    ]);
-    playSynthBeep(1100);
-    playRecalibrationSweep(100, 900);
-  };
-
-  // Target a vat to hook up its diagnostics
-  const handleTargetVat = (index) => {
-    setTargetedVatIndex(index);
+  // Cycle to the next Character Template/Outfit group
+  const handleCycleGroup = () => {
+    setActiveGroupIndex((prev) => (prev + 1) % characterGroups.length);
+    setActivePoseIndex(0); // Reset pose to first one in the new group
     playSynthBeep(850);
+    playRecalibrationSweep(200, 800);
   };
 
-  // Inject a custom specimen into the targeted chamber
-  const handleInjectPod = (indexInGlobal) => {
-    const selectedSprite = spriteData[indexInGlobal];
-    setVatSprites(prev => {
-      const next = [...prev];
-      next[targetedVatIndex] = selectedSprite;
-      return next;
-    });
+  // Cycle to the next Pose within the active group
+  const handleCyclePose = () => {
+    if (!hasMultiplePoses) return;
+    setActivePoseIndex((prev) => (prev + 1) % currentGroup.sprites.length);
     playSynthBeep(1000);
+  };
+
+  // Manual pod injection from bottom carousel
+  const handleInjectPod = (globalIndex) => {
+    const clickedSprite = spriteData[globalIndex];
+    
+    // Find which group and pose index this clicked sprite maps to
+    const groupIdx = characterGroups.findIndex(g => g.sprites.some(s => s.id === clickedSprite.id));
+    if (groupIdx !== -1) {
+      const poseIdx = characterGroups[groupIdx].sprites.findIndex(s => s.id === clickedSprite.id);
+      setActiveGroupIndex(groupIdx);
+      setActivePoseIndex(poseIdx);
+    }
+    playSynthBeep(1050);
   };
 
   // Trigger special sound when focused sprite updates
   useEffect(() => {
     if (soundEnabled) {
-      playRecalibrationSweep(300, 700);
+      playRecalibrationSweep(300, 650);
     }
-  }, [targetedVatIndex]);
+  }, [activeSprite]);
 
   return (
     <div className="lab-container">
@@ -202,7 +223,7 @@ export default function App() {
           {/* Diagnostic status tag */}
           <div className="status-badge terminal-font">
             <span className="status-badge-dot" />
-            <span>CONTAINMENT BAY ACTIVE</span>
+            <span>INCUBATOR ACTIVE</span>
           </div>
 
           {/* Sound Synthesizer Controller */}
@@ -230,54 +251,14 @@ export default function App() {
       {/* Main Core Showcase Console */}
       <main className="lab-main">
         
-        {/* Left Column: Glass Chambers incubation bay (4 Vats) */}
-        <section className="bay-panel">
-          <div className="bay-title-row">
-            <div>
-              <h2 className="bay-heading">CLONING Containment BAY</h2>
-              <span className="bay-subheading terminal-font">Click a chamber to link diagnostic feed</span>
-            </div>
-            
-            {/* Global Shuffle Poses override */}
-            <button
-              onClick={handleShuffleAllPoses}
-              className="shuffle-override-btn terminal-font"
-              title="Splat new genes into all four vats!"
-            >
-              <Shuffle style={{ width: '14px', height: '14px' }} />
-              <span>Mutate Poses</span>
-            </button>
-          </div>
-
-          {/* 4-Vat Containment bay grid */}
-          <div className="vats-grid">
+        {/* Left Column: Glass Chamber (Single large Vat) */}
+        <section className="column-left">
+          <div className="vat-panel">
             <CloneVat
-              activeSprite={vatSprites[0]}
-              targeted={targetedVatIndex === 0}
-              onTarget={() => handleTargetVat(0)}
-              chamberName="CHAMBER ALPHA"
-              categoryName="Base Clone"
-            />
-            <CloneVat
-              activeSprite={vatSprites[1]}
-              targeted={targetedVatIndex === 1}
-              onTarget={() => handleTargetVat(1)}
-              chamberName="CHAMBER BETA"
-              categoryName="Smart Replicant"
-            />
-            <CloneVat
-              activeSprite={vatSprites[2]}
-              targeted={targetedVatIndex === 2}
-              onTarget={() => handleTargetVat(2)}
-              chamberName="CHAMBER GAMMA"
-              categoryName="Pop Replicant"
-            />
-            <CloneVat
-              activeSprite={vatSprites[3]}
-              targeted={targetedVatIndex === 3}
-              onTarget={() => handleTargetVat(3)}
-              chamberName="CHAMBER DELTA"
-              categoryName="Custom Clone"
+              activeSprite={activeSprite}
+              onCycleGroup={handleCycleGroup}
+              onCyclePose={handleCyclePose}
+              hasMultiplePoses={hasMultiplePoses}
             />
           </div>
         </section>
@@ -300,7 +281,7 @@ export default function App() {
 
       {/* Developer Footer & GitHub page marker */}
       <div className="lab-footer">
-        <span className="terminal-font">SECURE REPLICANT CORE v1.1.2 • © 2026</span>
+        <span className="terminal-font">SECURE REPLICANT CORE v1.2.0 • © 2026</span>
         <a
           href="https://github.com/puredent"
           target="_blank"
